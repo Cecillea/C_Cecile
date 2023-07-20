@@ -14,6 +14,8 @@ static Obj* allocateObject(size_t size, ObjType type) {
   Obj* object = (Obj*)reallocate(NULL, 0, size);
   object->type = type;
   object->next = vm.objects;
+  object->isMarked = false;
+
   vm.objects = object;
 #ifdef DEBUG_LOG_GC
   printf("%p allocate %zu for %d\n", (void*)object, size, type);
@@ -56,7 +58,10 @@ static ObjString* allocateString(char* chars, int length, int32_t hash) {
   string->length = length;
   string->chars = chars;
   string->hash = hash;
+
+  push(CECILE_OBJ_VAL(string));
   tableSet(&vm.strings, string, CECILE_NIL_VAL);
+  pop();
   return string;
 }
 

@@ -49,6 +49,7 @@ int disassembleInstruction(Chunk* chunk, int offset) {
   } else {
     printf("%4d ", chunk->lines[offset]);
   }
+
   uint8_t instruction = chunk->code[offset];
   switch (instruction) {
     case OP_CONSTANT:

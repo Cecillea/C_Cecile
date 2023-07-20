@@ -4,6 +4,7 @@
 #include "chunk.h"
 #include "object.h"
 #include "table.h"
+#include <stddef.h>
 
 
 #define FRAMES_MAX 64
@@ -28,7 +29,13 @@ typedef struct {
   Table globals;
   Table strings;
   ObjUpvalue* openUpvalues;
+
+  size_t bytesAllocated;
+  size_t nextGC;
   Obj* objects;
+  int grayCount;
+  int grayCapacity;
+  Obj** grayStack;
 } VM;
 
 typedef enum {
