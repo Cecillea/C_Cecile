@@ -1,6 +1,7 @@
 #include "chunk.h"
 #include <string.h>
 #include "common.h"
+#include "table.h"
 #include "value.h"
 #include "vm.h"
 #include <stddef.h>
@@ -116,6 +117,11 @@ static bool call(ObjClosure* closure, int argCount) {
 static bool callValue(Value callee, int argCount) {
   if (CECILE_IS_OBJ(callee)) {
     switch (CECILE_OBJ_TYPE(callee)) {
+      case OBJ_CLASS: {
+        ObjClass* klass = CECILE_AS_CLASS(callee);
+        vm.stackTop[-argCount -1] = CECILE_OBJ_VAL(newInstance(klass));
+        return true;
+      }
       case OBJ_CLOSURE:
         return call(AS_CLOSURE(callee), argCount);
       case CECILE_OBJ_NATIVE: {
@@ -267,6 +273,10 @@ static InterpretResult run() {
         break;
       }
 
+      case OP_CLASS:
+        push(CECILE_OBJ_VAL(newClass(READ_STRING())));
+        break;
+
       case OP_EQUAL: {
         Value b = pop();
         Value a = pop();
@@ -360,6 +370,37 @@ static InterpretResult run() {
         closeUpvalues(vm.stackTop - 1);
         pop();
         break;
+      case OP_GET_PROPERTY: {
+        if (!CECILE_IS_INSTANCE(peek(0))) {
+          runtimeError("Only instances have properties.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
+        ObjInstance* instance = CECILE_AS_INSTANCE(peek(0));
+        ObjString*name = READ_STRING();
+
+        Value value;
+        if (tableGet(&instance->fields, name, &value)) {
+          pop(); //Instance
+          push(value);
+          break;
+        }
+        runtimeError("Undefined property '%s'.", name->chars);
+        return INTERPRET_RUNTIME_ERROR;
+      }
+      case OP_SET_PROPERTY: {
+        if (!CECILE_IS_INSTANCE(peek(1))) {
+          runtimeError("Only instances have fields.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+
+        ObjInstance* instance = CECILE_AS_INSTANCE(peek(1));
+        tableSet(&instance->fields, READ_STRING(), peek(0));
+        Value value = pop();
+        pop();
+        push(value);
+        break;
+      }
       case OP_RETURN: {
         Value result = pop();
         closeUpvalues(frame->slots);

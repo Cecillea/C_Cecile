@@ -3,6 +3,7 @@
 
 #include "chunk.h"
 #include "common.h"
+#include "table.h"
 #include "value.h"
 
 #define CECILE_OBJ_TYPE(value)        (CECILE_AS_OBJ(value)->type)
@@ -10,8 +11,11 @@
 #define CECILE_IS_NATIVE(value)       isObjType(value, CECILE_OBJ_NATIVE)
 #define CECILE_IS_STRING(value)       isObjType(value, CECILE_OBJ_STRING)
 #define IS_CLOSURE(value)      isObjType(value, OBJ_CLOSURE)
+#define CECILE_IS_CLASS(value)        isObjType(value, OBJ_CLASS)
+#define CECILE_IS_INSTANCE(value)     isObjType(value, CECILE_OBJ_INSTANCE)
 
-
+#define CECILE_AS_INSTANCE(value)            ((ObjInstance*)CECILE_AS_OBJ(value))
+#define CECILE_AS_CLASS(value)        ((ObjClass*)CECILE_AS_OBJ(value))
 #define AS_CLOSURE(value)      ((ObjClosure*)CECILE_AS_OBJ(value))
 #define CECILE_AS_STRING(value)       ((ObjString*)CECILE_AS_OBJ(value))
 #define CECILE_AS_FUNCTION(value)     ((ObjFunction*)CECILE_AS_OBJ(value))
@@ -22,9 +26,11 @@
 
 typedef enum {
   CECILE_OBJ_FUNCTION,
+  CECILE_OBJ_INSTANCE,
   CECILE_OBJ_NATIVE,
   CECILE_OBJ_STRING,
   OBJ_CLOSURE,
+  OBJ_CLASS,
   OBJ_UPVALUE,
 } ObjType;
 
@@ -71,6 +77,19 @@ typedef struct {
   int upvalueCount;
 } ObjClosure;
 
+typedef struct {
+  Obj obj;
+  ObjString* name;
+} ObjClass;
+
+typedef struct {
+  Obj obj;
+  ObjClass* klass;
+  Table fields;
+} ObjInstance;
+
+ObjInstance* newInstance(ObjClass* klass);
+ObjClass* newClass(ObjString* name);
 ObjClosure* newClosure(ObjFunction* function);
 ObjFunction* newFunction();
 ObjNative* newNative(NativeFn function);

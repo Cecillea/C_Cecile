@@ -5,6 +5,7 @@
 #include "memory.h" 
 #include "value.h"
 typedef enum {
+  OP_CLASS,
   OP_RETURN,
   OP_NEGATE,
   OP_PRINT,
@@ -24,6 +25,8 @@ typedef enum {
   OP_SET_GLOBAL,
   OP_GET_UPVALUE,
   OP_SET_UPVALUE,
+  OP_GET_PROPERTY,
+  OP_SET_PROPERTY,
   OP_EQUAL,
   OP_DEFINE_GLOBAL,
   OP_GREATER,

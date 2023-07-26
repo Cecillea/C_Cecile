@@ -24,6 +24,19 @@ static Obj* allocateObject(size_t size, ObjType type) {
   return object;
 }
 
+ObjInstance* newInstance(ObjClass *klass) {
+  ObjInstance* instance = ALLOCATE_OBJ(ObjInstance, CECILE_OBJ_INSTANCE);
+  instance->klass = klass;
+  initTable(&instance->fields);
+  return instance;
+}
+
+ObjClass* newClass(ObjString *name) {
+  ObjClass* klass = ALLOCATE_OBJ(ObjClass, OBJ_CLASS);
+  klass->name = name;
+  return klass;
+}
+
 ObjClosure* newClosure(ObjFunction* function) {
   ObjUpvalue** upvalues = ALLOCATE(ObjUpvalue*,
                                    function->upvalueCount);
@@ -115,6 +128,13 @@ static void printFunction(ObjFunction* function) {
 
 void printObject(Value value) {
   switch (CECILE_OBJ_TYPE(value)) {
+    case CECILE_OBJ_INSTANCE:
+      printf("%s instance",
+             CECILE_AS_INSTANCE(value)->klass->name->chars);
+      break;
+    case OBJ_CLASS:
+      printf("%s", CECILE_AS_CLASS(value)->name->chars);
+      break;
     case OBJ_UPVALUE:
       printf("upvalue");
       break;
