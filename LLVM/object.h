@@ -13,7 +13,9 @@
 #define IS_CLOSURE(value)      isObjType(value, OBJ_CLOSURE)
 #define CECILE_IS_CLASS(value)        isObjType(value, OBJ_CLASS)
 #define CECILE_IS_INSTANCE(value)     isObjType(value, CECILE_OBJ_INSTANCE)
+#define IS_BOUND_METHOD(value) isObjType(value, OBJ_BOUND_METHOD)
 
+#define AS_BOUND_METHOD(value) ((ObjBoundMethod*)CECILE_AS_OBJ(value))
 #define CECILE_AS_INSTANCE(value)            ((ObjInstance*)CECILE_AS_OBJ(value))
 #define CECILE_AS_CLASS(value)        ((ObjClass*)CECILE_AS_OBJ(value))
 #define AS_CLOSURE(value)      ((ObjClosure*)CECILE_AS_OBJ(value))
@@ -32,6 +34,7 @@ typedef enum {
   OBJ_CLOSURE,
   OBJ_CLASS,
   OBJ_UPVALUE,
+  OBJ_BOUND_METHOD,
 } ObjType;
 
 
@@ -80,6 +83,7 @@ typedef struct {
 typedef struct {
   Obj obj;
   ObjString* name;
+  Table methods;
 } ObjClass;
 
 typedef struct {
@@ -88,6 +92,14 @@ typedef struct {
   Table fields;
 } ObjInstance;
 
+typedef struct {
+  Obj obj;
+  Value receiver;
+  ObjClosure* method;
+} ObjBoundMethod;
+
+ObjBoundMethod* newBoundMethod(Value receiver,
+                               ObjClosure* method);
 ObjInstance* newInstance(ObjClass* klass);
 ObjClass* newClass(ObjString* name);
 ObjClosure* newClosure(ObjFunction* function);

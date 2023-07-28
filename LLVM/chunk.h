@@ -6,8 +6,10 @@
 #include "value.h"
 typedef enum {
   OP_CLASS,
+  OP_METHOD,
   OP_RETURN,
   OP_NEGATE,
+  OP_INVOKE,
   OP_PRINT,
   OP_LOOP,
   OP_CALL,
