@@ -29,6 +29,17 @@ void freeValueArray(ValueArray *array) {
 }
 
 void printValue(Value value) {
+#ifdef NAN_BOXING
+  if (CECILE_IS_BOOL(value)) {
+    printf(CECILE_AS_BOOL(value) ? "true" : "false");
+  } else if (CECILE_IS_NIL(value)) {
+    printf("nil");
+  } else if (CECILE_IS_NUMBER(value)) {
+    printf("%g", CECILE_AS_NUMBER(value));
+  } else if (CECILE_IS_OBJ(value)) {
+    printObject(value);
+  }
+#else
    switch (value.type) {
     case CECILE_VAL_BOOL:
       printf(CECILE_AS_BOOL(value) ? "true" : "false");
@@ -37,9 +48,16 @@ void printValue(Value value) {
     case CECILE_VAL_NUMBER: printf("%g", CECILE_AS_NUMBER(value)); break;
     case CECILE_VAL_OBJ: printObject(value); break;
   }
+#endif
 }
 
 bool valuesEqual(Value a, Value b) {
+#ifdef NAN_BOXING
+  if (CECILE_IS_NUMBER(a) && CECILE_IS_NUMBER(b)) {
+    return CECILE_AS_NUMBER(a) == CECILE_AS_NUMBER(b);
+  }
+  return a == b;
+#else
   if (a.type != b.type) return false;
 
   switch (a.type) {
@@ -50,4 +68,5 @@ bool valuesEqual(Value a, Value b) {
     default: return false;
 
   }
+ #endif
 }

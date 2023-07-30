@@ -5,6 +5,9 @@
 #include "memory.h" 
 #include "value.h"
 typedef enum {
+  OP_SUPER_INVOKE,
+  OP_GET_SUPER,
+  OP_INHERIT,
   OP_CLASS,
   OP_METHOD,
   OP_RETURN,
